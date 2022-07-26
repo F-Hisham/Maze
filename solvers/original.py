@@ -1,7 +1,7 @@
 import copy
 import random
 from typing import Tuple
-from maze.maze import Maze
+from maze.maze_objs import Maze
 from maze.cells import Coords
 from maze.constants import Locations
 

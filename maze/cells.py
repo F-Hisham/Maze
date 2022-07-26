@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from typing import Optional, Tuple
+
+from maze.constants import Locations
 
 
 @dataclass
@@ -11,59 +14,106 @@ class Coords:
 
 
 @dataclass
-class Cell:
-    x: int
-    y: int
-    max_x: int
-    max_y: int
+class CellValue:
+    cell_type: Locations
 
-    def coords_equal(self, other):
-        return self.x == other.x and self.y == other.y
-    
-    def limits_equal(self, other):
-        return self.max_x == other.max_x and self.max_y == other.max_y
-        
-    def __eq__(self, other):
-        return self.coords_equal(other) and self.limits_equal(other)
 
-    def is_in_bounds(self, x, y):
-        return 0 <= x < self.max_x and 0 <= y < self.max_y
+class CellArray:
+    # TODO -> decouple CellType from the set and get etc.
+    def __init__(self, nested_cells: Tuple[Tuple[CellValue]]) -> None:
+        self.array = nested_cells
     
-    def new_cell(self, x, y):
-        if self.is_in_bounds(x, y):
-            return Cell(x, y, max_x=self.max_x, max_y=self.max_y)
+    def get_cell_type(self, coords: Coords) -> Locations:
+        cell_type = self.array[coords.y][coords.x].cell_type
+        return cell_type
+    
+    def set_cell_type(self, coords: Coords, cell_type: Locations):
+        self.array[coords.y][coords.x].cell_type = cell_type
+    
+    @property
+    def num_rows(self) -> int:
+        return len(self.array)
+
+    @property
+    def num_cols(self) -> int:
+        row_lengths = [len(x) for x in self.array]
+        max_row_len = max(row_lengths)
+        if not all([row_len == max_row_len for row_len in row_lengths]):
+            raise RuntimeError(
+                f"Expected equal length rows, instead got lengths of: {row_lengths}"
+            )
         else:
-            return None
+            return max_row_len
+
+    def is_in_bounds(self, coords: Coords) -> bool:
+        return 0 <= coords.y < self.num_rows and 0 <= coords.x < self.num_cols
+           
+    def up(self, coords: Coords) -> Optional[Coords]:
+        up = Coords(coords.x - 1, coords.y)
+        return up if self.is_in_bounds(up) else None
+    
+    def down(self, coords: Coords) -> Optional[Coords]:
+        down = Coords(coords.x + 1, coords.y)
+        return down if self.is_in_bounds(down) else None
+    
+    def left(self, coords: Coords) -> Optional[Coords]:
+        left = Coords(coords.x , coords.y - 1)
+        return left if self.is_in_bounds(left) else None
+    
+    def right(self, coords: Coords) -> Optional[Coords]:
+        right = Coords(coords.x , coords.y + 1)
+        return right if self.is_in_bounds(right) else None
+    
+    def adjacent_cells(self, coords: Coords) -> Tuple[Optional[Coords]]:
+        cells = (
+            self.up(coords), 
+            self.down(coords), 
+            self.left(coords), 
+            self.right(coords)
+        )
+        return tuple(cell for cell in cells if cell)
+    
+    def is_adjacent(self, coords: Coords, other_coords: Coords) -> bool:
+        return other_coords in self.adjacent_cells(coords)
+    
+    @classmethod
+    def load_from_iterables(cls, iterables):
+        row_lengths = [len(row) for row in iterables]
+        max_row_len = max([len(row) for row in iterables])
+        if not all([row_len == max_row_len for row_len in row_lengths]):
+            raise RuntimeError(
+                f"Expected equal length rows, instead got lengths of: {row_lengths}"
+            )
         
-    @property
-    def up(self):
-        new_x, new_y = self.x, self.y
-        return self.new_cell(x=new_x, y=new_y)
+        nested_tuples = tuple(
+            tuple(CellValue(Locations(val)) for val in row) for row in iterables
+        )
+        
+        return CellArray(nested_tuples)
     
-    @property
-    def down(self):
-        new_x, new_y = self.x + 1, self.y
-        return self.new_cell(x=new_x, y=new_y)
+    def __repr__(self) -> str:
+        string_list = []
+        for row in self.array:
+            string_list.append("\n")
+            string_list.extend([str(cell.cell_type.value) for cell in row])
+        return " ".join(string_list)        
     
-    @property
-    def left(self):
-        new_x, new_y = self.x, self.y - 1
-        return self.new_cell(x=new_x, y=new_y)
-    
-    @property
-    def right(self):
-        new_x, new_y = self.x, self.y + 1
-        return self.new_cell(x=new_x, y=new_y)
-    
-    @property
-    def adjacent_cells(self):
-        return [self.up, self.down, self.left, self.right]
-    
-    def is_adjacent(self, other_cell):
-        return other_cell in self.adjacent_cells
-            
 
 def main():
-    cell_a = Cell(1, 1, 10, 10)
-    cell_b = Cell(1, 2, 10 , 10)
+    maze = CellArray.load_from_iterables(iterables=[
+        [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+        [1, 1, 1, 1, 0, 1, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0, 1, 1, 1, 0, 1],
+        [0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+        [0, 0, 0, 1, 1, 0, 1, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 1, 0, 1, 1, 0, 0],
+        [0, 1, 0, 0, 1, 0, 1, 0, 0, 0],
+    ])
     temp = 1
+    
+    
+if __name__=="__main__":
+    main()

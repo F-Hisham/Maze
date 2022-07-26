@@ -1,4 +1,4 @@
-from maze.maze import Maze
+from maze.maze_objs import Maze
 from maze.cells import Coords
 from solvers.original import MazeSolver
 
