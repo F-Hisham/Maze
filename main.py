@@ -1,6 +1,6 @@
-from maze.maze_objs import Maze
+from maze.basic_maze import Maze
 from maze.cells import Coords
-from solvers.original import MazeSolver
+from solvers.simple import PseudoDirectionalMazeSolver
 
 
 def main():
@@ -20,9 +20,9 @@ def main():
     start = Coords(x=0, y=0)
     end = Coords(x=9, y=9)
 
-    maze_solver = MazeSolver(maze, start, end)
-    output = maze_solver.snake_path()
-    print(output)
+    maze_solver = PseudoDirectionalMazeSolver(maze, start, end, visualize=True)
+    solver_stats = maze_solver.solve()    
+    print(solver_stats)
     temp = 1
 
 
