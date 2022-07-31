@@ -2,11 +2,10 @@ import random
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from maze.basic_maze import Maze
 from maze.cells import Coords
-from numpy import double
 
 
 @dataclass
@@ -19,6 +18,7 @@ class SolverResult:
 
 @dataclass
 class SolverStats:
+    solver_class: str
     results_sets: List[SolverResult]
 
     @property
@@ -47,7 +47,7 @@ class SolverStats:
 
     @property
     def length_score(self):
-        return sum(self.length_stats.values())
+        return self.length_stats.values()
 
     @property
     def solve_time_stats(self):
@@ -70,8 +70,8 @@ class SolverStats:
 
     def __repr__(self) -> str:
         return (
-            f"Solver stats: \n"
-            f"Total score: {self.total_score:.2f} \n"
+            f"Solver stats for class {self.solver_class}: \n"
+            f"Total score for {len(self.results_sets)} tests: {self.total_score:.2f} \n"
             f"All paths valid results: {self.all_paths_valid}\n"
             f"Path length score ({self.length_score:.2f}): {self.length_stats}\n"
             f"Solver timing score ({self.timer_score:.2f}): {self.solve_time_stats}"
@@ -82,16 +82,19 @@ class BaseMazeSolver(ABC):
     def __init__(
         self,
         maze: Maze,
-        start_coords: Coords,
-        end_coords: Coords,
+        start_coords: Optional[Coords] = None,
+        end_coords: Optional[Coords] = None,
         visualize: bool = False,
     ):
         # Do not attempt to modify original maze, it is needed for validation
         self.__original_maze = maze
 
         # Do not modify the start and end coordinates either
-        self.start_coords = start_coords
-        self.end_coords = end_coords
+        self.start_coords = start_coords or Coords(0, 0)
+        bottom_right = Coords(
+            self.original_maze.num_cols - 1, self.original_maze.num_rows - 1
+        )
+        self.end_coords = end_coords or bottom_right
 
         # If you have any plotting, make sure it can be turned on and off using
         # the visualize attribute below
@@ -101,6 +104,9 @@ class BaseMazeSolver(ABC):
         # seed to allow for testing with different random number series
         self.rand_seed = 1
 
+        self.validate_start_coords()
+        self.validate_end_coords()
+
     @property
     def original_maze(self):
         return self.__original_maze
@@ -108,6 +114,20 @@ class BaseMazeSolver(ABC):
     @original_maze.setter
     def original_maze(self, value):
         raise RuntimeError("Do not try and change the original maze.")
+
+    def validate_start_coords(self):
+        if not self.original_maze.is_valid_road(self.start_coords):
+            raise RuntimeError(
+                f"Start coords {self.start_coords} is not a valid road "
+                f"in maze {self.original_maze}."
+            )
+
+    def validate_end_coords(self):
+        if not self.original_maze.is_valid_road(self.end_coords):
+            raise RuntimeError(
+                f"End coords {self.end_coords} is not a valid road "
+                f"in maze {self.original_maze}."
+            )
 
     @abstractmethod
     def solve(self) -> Tuple[Coords]:
@@ -144,7 +164,9 @@ class BaseMazeSolver(ABC):
             solver_results = self.profile_solve()
             results_list.append(solver_results)
 
-        solver_stats = SolverStats(results_sets=results_list)
+        solver_stats = SolverStats(
+            solver_class=self.__class__.__name__, results_sets=results_list
+        )
         return solver_stats
 
     def validate_path(self, path: Tuple[Coords]):

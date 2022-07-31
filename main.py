@@ -4,25 +4,18 @@ from solvers.simple import PseudoDirectionalMazeSolver, SimpleMazeSolver
 
 
 def main():
-    maze = Maze(array=[
-        [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-        [1, 1, 1, 1, 0, 1, 0, 0, 0, 1],
-        [0, 0, 0, 1, 0, 1, 1, 1, 0, 1],
-        [0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-        [0, 0, 0, 1, 1, 0, 1, 0, 1, 1],
-        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-        [0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 1, 0, 1, 1, 0, 0],
-        [0, 1, 0, 0, 1, 0, 1, 0, 0, 0],
-    ])
+    maze = Maze.create_maze_from_excel("mazes.xlsx", "maze_a")
 
-    start = Coords(x=0, y=0)
-    end = Coords(x=9, y=9)
+    # maze_solver_b = SimpleMazeSolver(maze, visualize=True)
+    # single_sol = maze_solver_b.solve()
+    # solver_stats_b = maze_solver_b.solver_stats(n=10)
+    # print(solver_stats_b)
 
-    maze_solver = SimpleMazeSolver(maze, start, end, visualize=True)
-    solver_stats = maze_solver.solver_stats(n=100)    
-    print(solver_stats)
+    maze_solver_a = PseudoDirectionalMazeSolver(maze, visualize=True)
+    solution = maze_solver_a.solve()
+    solver_stats_a = maze_solver_a.solver_stats(n=10)
+    print(solver_stats_a)
+
     temp = 1
 
 
