@@ -6,12 +6,7 @@ from solvers.simple import PseudoDirectionalMazeSolver, SimpleMazeSolver
 def main():
     maze = Maze.create_maze_from_excel("mazes.xlsx", "maze_a")
 
-    # maze_solver_b = SimpleMazeSolver(maze, visualize=True)
-    # single_sol = maze_solver_b.solve()
-    # solver_stats_b = maze_solver_b.solver_stats(n=10)
-    # print(solver_stats_b)
-
-    maze_solver_a = PseudoDirectionalMazeSolver(maze, visualize=True)
+    maze_solver_a = SimpleMazeSolver(maze, visualize=True)
     solution = maze_solver_a.solve()
     solver_stats_a = maze_solver_a.solver_stats(n=10)
     print(solver_stats_a)

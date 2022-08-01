@@ -47,7 +47,7 @@ class SolverStats:
 
     @property
     def length_score(self):
-        return self.length_stats.values()
+        return sum(self.length_stats.values())
 
     @property
     def solve_time_stats(self):
