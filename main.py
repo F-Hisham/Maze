@@ -13,6 +13,6 @@ def main():
 
     temp = 1
 
-
+#Quick test to check if the project is plugged to Git
 if __name__ == "__main__":
     main()
