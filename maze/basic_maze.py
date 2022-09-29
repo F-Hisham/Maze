@@ -69,9 +69,7 @@ class Maze(ExcelToIterablesMixin):
 
     def adjacent_roads(self, coords: Coords) -> Tuple[Coords]:
         roads = (
-            x
-            for x in self.cell_array.adjacent_cells(coords=coords)
-            if self.is_valid_road(x)
+            x for x in self.cell_array.adjacent_cells(coords=coords) if self.is_valid_road(x)
         )
         return tuple(roads)
 

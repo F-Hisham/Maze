@@ -19,7 +19,10 @@ class Coords:
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
-    
+
+    def __sub__(self, other):
+        return Coords(self.x - other.x, self.y - other.y)
+
     def apply_move(self, move_coords: Self) -> Self:
         return Coords(self.x + move_coords.x, self.y + move_coords.y)
 
@@ -84,7 +87,7 @@ class CellArray:
         """Are given coords in the cell array."""
         return 0 <= coords.y < self.num_rows and 0 <= coords.x < self.num_cols
 
-    def in_bounds_move(self, coords: Coords, move: Coords)-> Optional[Coords]:
+    def in_bounds_move(self, coords: Coords, move: Coords) -> Optional[Coords]:
         """Apply move to coords. If the final coords are inside the array then
         return new coords. If the final coords are outside the array then return
         None."""
