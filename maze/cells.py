@@ -20,8 +20,9 @@ class Coords:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
-    def __sub__(self, other):
-        return Coords(self.x - other.x, self.y - other.y)
+    #Not allowed to change this class
+    # def __sub__(self, other):
+    #     return Coords(self.x - other.x, self.y - other.y)
 
     def apply_move(self, move_coords: Self) -> Self:
         return Coords(self.x + move_coords.x, self.y + move_coords.y)
